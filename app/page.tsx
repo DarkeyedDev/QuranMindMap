@@ -1,39 +1,54 @@
 "use client"
 
-import { DashboardHeader } from '@/components/dashboard/header'
-import { ProgressOverview } from '@/components/dashboard/progress-overview'
-import { CurrentFocus } from '@/components/dashboard/current-focus'
-import { StudySessions } from '@/components/dashboard/study-sessions'
-import { QuickActions } from '@/components/dashboard/quick-actions'
-import { RecentActivity } from '@/components/dashboard/recent-activity'
+import { Sidebar } from '@/components/layout/sidebar'
+import { Header } from '@/components/layout/header'
+import { WelcomeSection } from '@/components/dashboard/welcome-section'
+import { AnalyticsPanel } from '@/components/dashboard/analytics-panel'
+import { useState } from 'react'
 
 export default function Home() {
+  const [activeView, setActiveView] = useState<'welcome' | 'analytics'>('welcome')
+
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-800">
-      <DashboardHeader />
+    <div className="flex h-screen bg-gray-50">
+      <Sidebar />
       
-      <main className="container mx-auto px-4 py-8 space-y-8">
-        <div className="text-center space-y-2 mb-8">
-          <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-            Continue your memorization journey with today's session. You're making excellent progress!
-          </p>
-        </div>
+      <div className="flex-1 flex flex-col overflow-hidden">
+        <Header />
         
-        <ProgressOverview />
-        
-        <CurrentFocus />
-        
-        <StudySessions />
-        
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          <div className="lg:col-span-1">
-            <QuickActions />
+        <main className="flex-1 overflow-auto">
+          <div className="p-6">
+            {/* View Toggle */}
+            <div className="mb-6">
+              <div className="flex space-x-4">
+                <button
+                  onClick={() => setActiveView('welcome')}
+                  className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                    activeView === 'welcome'
+                      ? 'bg-blue-100 text-blue-700'
+                      : 'text-gray-600 hover:text-gray-900'
+                  }`}
+                >
+                  Welcome Dashboard
+                </button>
+                <button
+                  onClick={() => setActiveView('analytics')}
+                  className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                    activeView === 'analytics'
+                      ? 'bg-blue-100 text-blue-700'
+                      : 'text-gray-600 hover:text-gray-900'
+                  }`}
+                >
+                  Analytics View
+                </button>
+              </div>
+            </div>
+
+            {/* Content */}
+            {activeView === 'welcome' ? <WelcomeSection /> : <AnalyticsPanel />}
           </div>
-          <div className="lg:col-span-2">
-            <RecentActivity />
-          </div>
-        </div>
-      </main>
+        </main>
+      </div>
     </div>
   )
 }
