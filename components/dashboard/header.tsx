@@ -47,7 +47,7 @@ export function DashboardHeader() {
                 <AvatarFallback className="bg-emerald-100 text-emerald-700">A</AvatarFallback>
               </Avatar>
               <div className="hidden sm:block">
-                <p className="text-sm font-medium">Welcome back, Ahmad</p>
+                <p className="text-sm font-medium">Welcome back, Sarwar</p>
               </div>
             </div>
           </div>
