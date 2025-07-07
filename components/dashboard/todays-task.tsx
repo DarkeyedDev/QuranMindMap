@@ -36,24 +36,6 @@ export function TodaysTask() {
       setCompletedVerses(completedToday);
     }
   }, []);
-  const toggleVerse = (verseId: number) => {
-    const newCompleted = completedVerses.includes(verseId) 
-      ? completedVerses.filter(id => id !== verseId)
-      : [...completedVerses, verseId];
-    
-    setCompletedVerses(newCompleted);
-    
-    // Save to storage
-    const progress = progressStorage.get();
-    const surahProgress = progress.find(p => p.surahId === 2);
-    const allCompleted = surahProgress ? surahProgress.completedVerses : [];
-    
-    const updatedCompleted = completedVerses.includes(verseId)
-      ? allCompleted.filter(id => id !== verseId)
-      : [...allCompleted.filter(id => id !== verseId), verseId];
-    
-    progressStorage.updateSurah(2, updatedCompleted);
-  }
 
   const toggleVerse = (verseId: number) => {
     const newCompleted = completedVerses.includes(verseId) 
@@ -72,10 +54,6 @@ export function TodaysTask() {
       : allCompleted.filter(id => id !== verseId);
     
     progressStorage.updateSurah(2, updatedCompleted);
-  }
-        ? prev.filter(id => id !== verseId)
-        : [...prev, verseId]
-    )
   }
 
   return (
