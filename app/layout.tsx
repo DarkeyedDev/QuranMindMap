@@ -2,6 +2,8 @@ import './globals.css';
 import type { Metadata } from 'next';
 import { Inter, Amiri } from 'next/font/google';
 import { ThemeProvider } from '@/components/theme-provider';
+import { AppProvider } from '@/contexts/app-context';
+import { ErrorBoundary } from '@/components/ui/error-boundary';
 
 const inter = Inter({ 
   subsets: ['latin'],
@@ -41,14 +43,18 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning className={`${inter.variable} ${amiri.variable}`}>
       <body className={inter.className}>
-        <ThemeProvider
-          attribute="class"
-          defaultTheme="system"
-          enableSystem
-          disableTransitionOnChange
-        >
-          {children}
-        </ThemeProvider>
+        <ErrorBoundary>
+          <ThemeProvider
+            attribute="class"
+            defaultTheme="system"
+            enableSystem
+            disableTransitionOnChange
+          >
+            <AppProvider>
+              {children}
+            </AppProvider>
+          </ThemeProvider>
+        </ErrorBoundary>
       </body>
     </html>
   );

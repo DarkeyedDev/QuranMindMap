@@ -5,10 +5,18 @@ import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Play, Pause, RotateCcw, CheckCircle, Volume2 } from 'lucide-react'
 import { useState } from 'react'
+import { useAudioPlayer } from '@/hooks/use-audio-player'
+import { progressStorage } from '@/lib/storage'
+import { useEffect } from 'react'
 
 export function TodaysTask() {
-  const [isPlaying, setIsPlaying] = useState(false)
   const [completedVerses, setCompletedVerses] = useState<number[]>([])
+  
+  // Audio player hook
+  const { isPlaying, toggle, restart, error } = useAudioPlayer({
+    src: '/audio/al-baqarah-51-53.mp3', // This would be the actual audio file
+    loop: false
+  })
 
   const todaysVerses = [
     { id: 1, number: 51, arabic: "وَإِذْ وَاعَدْنَا مُوسَىٰ أَرْبَعِينَ لَيْلَةً", translation: "And [recall] when We made an appointment with Moses for forty nights." },
@@ -16,9 +24,55 @@ export function TodaysTask() {
     { id: 3, number: 53, arabic: "وَأَنتُمْ ظَالِمُونَ", translation: "And you were wrongdoers." }
   ]
 
+  // Load completed verses from storage on mount
+  useEffect(() => {
+    const progress = progressStorage.get();
+    const surahProgress = progress.find(p => p.surahId === 2); // Al-Baqarah
+    if (surahProgress) {
+      const todayVerseIds = todaysVerses.map(v => v.id);
+      const completedToday = surahProgress.completedVerses.filter(id => 
+        todayVerseIds.includes(id)
+      );
+      setCompletedVerses(completedToday);
+    }
+  }, []);
   const toggleVerse = (verseId: number) => {
-    setCompletedVerses(prev => 
-      prev.includes(verseId) 
+    const newCompleted = completedVerses.includes(verseId) 
+      ? completedVerses.filter(id => id !== verseId)
+      : [...completedVerses, verseId];
+    
+    setCompletedVerses(newCompleted);
+    
+    // Save to storage
+    const progress = progressStorage.get();
+    const surahProgress = progress.find(p => p.surahId === 2);
+    const allCompleted = surahProgress ? surahProgress.completedVerses : [];
+    
+    const updatedCompleted = completedVerses.includes(verseId)
+      ? allCompleted.filter(id => id !== verseId)
+      : [...allCompleted.filter(id => id !== verseId), verseId];
+    
+    progressStorage.updateSurah(2, updatedCompleted);
+  }
+
+  const toggleVerse = (verseId: number) => {
+    const newCompleted = completedVerses.includes(verseId) 
+      ? completedVerses.filter(id => id !== verseId)
+      : [...completedVerses, verseId];
+    
+    setCompletedVerses(newCompleted);
+    
+    // Save to storage
+    const progress = progressStorage.get();
+    const surahProgress = progress.find(p => p.surahId === 2);
+    const allCompleted = surahProgress ? surahProgress.completedVerses : [];
+    
+    const updatedCompleted = newCompleted.includes(verseId)
+      ? [...allCompleted.filter(id => !todaysVerses.map(v => v.id).includes(id)), ...newCompleted]
+      : allCompleted.filter(id => id !== verseId);
+    
+    progressStorage.updateSurah(2, updatedCompleted);
+  }
         ? prev.filter(id => id !== verseId)
         : [...prev, verseId]
     )
@@ -43,13 +97,15 @@ export function TodaysTask() {
           <Button
             variant="outline"
             size="icon"
+            onClick={restart}
             className="border-green-300 hover:bg-green-200 dark:border-green-700 dark:hover:bg-green-800"
           >
             <RotateCcw className="h-4 w-4" />
           </Button>
           <Button
-            onClick={() => setIsPlaying(!isPlaying)}
+            onClick={toggle}
             className="bg-green-600 hover:bg-green-700 text-white"
+            disabled={!!error}
           >
             {isPlaying ? <Pause className="h-4 w-4 mr-2" /> : <Play className="h-4 w-4 mr-2" />}
             {isPlaying ? 'Pause' : 'Play'}
@@ -58,6 +114,12 @@ export function TodaysTask() {
             Mishary Al-Afasy
           </div>
         </div>
+        
+        {error && (
+          <div className="text-sm text-red-600 dark:text-red-400 text-center">
+            {error}
+          </div>
+        )}
 
         {/* Verses List */}
         <div className="space-y-3">
